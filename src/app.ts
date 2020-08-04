@@ -86,8 +86,8 @@ interface ICard {
   }
 
   const resetBoard = ():void =>{
-    btnDraw.disabled = false;
-    btnPass.disabled = false;
+    btnDraw.style.display = "inline-block";
+    btnPass.style.display = "inline-block";
     reshuffleDeck();
     playerPoints.forEach(function(element, index, array){
       array[index] = 0;
@@ -131,6 +131,11 @@ interface ICard {
     }
     playersContainer[playerTurn].setAttribute("style", "color: #f8d020");
     playerTurn++;
+    
+   if(playerTurn==playerNumbers){
+    showSummary();
+   }
+   
     if(playerTurn>=playerNumbers){
       playerTurn=0;
     }
@@ -181,10 +186,17 @@ interface ICard {
         indexPlayer = index;
       }
     })
-    indexPlayer++;
-    let output: string = `
-    Wygrywa gacz ${indexPlayer} uzyskując ${maxValue} pukntów
-  `;
+    let output: string;
+    if(indexPlayer==-1){
+      output = `
+      Przegrana
+    `;
+    }else{
+      indexPlayer++;
+      output = `
+      Wygrywa gacz ${indexPlayer} uzyskując ${maxValue} pukntów
+    `;
+    }
   summaryContainer.innerHTML = output;
   }
 
@@ -206,8 +218,8 @@ interface ICard {
   }
 
   const disableBtn = ():void =>{
-    btnDraw.disabled = true;
-    btnPass.disabled = true;
+    btnDraw.style.display = "none";
+    btnPass.style.display = "none";
   }
   
   getDeck();

@@ -126,8 +126,8 @@ var startGame = function () {
     playerDraw();
 };
 var resetBoard = function () {
-    btnDraw.disabled = false;
-    btnPass.disabled = false;
+    btnDraw.style.display = "inline-block";
+    btnPass.style.display = "inline-block";
     reshuffleDeck();
     playerPoints.forEach(function (element, index, array) {
         array[index] = 0;
@@ -169,6 +169,9 @@ var pass = function () {
     }
     playersContainer[playerTurn].setAttribute("style", "color: #f8d020");
     playerTurn++;
+    if (playerTurn == playerNumbers) {
+        showSummary();
+    }
     if (playerTurn >= playerNumbers) {
         playerTurn = 0;
     }
@@ -218,8 +221,14 @@ var showSummary = function () {
             indexPlayer = index;
         }
     });
-    indexPlayer++;
-    var output = "\n    Wygrywa gacz " + indexPlayer + " uzyskuj\u0105c " + maxValue + " puknt\u00F3w\n  ";
+    var output;
+    if (indexPlayer == -1) {
+        output = "\n      Przegrana\n    ";
+    }
+    else {
+        indexPlayer++;
+        output = "\n      Wygrywa gacz " + indexPlayer + " uzyskuj\u0105c " + maxValue + " puknt\u00F3w\n    ";
+    }
     summaryContainer.innerHTML = output;
 };
 var playerWinOczko = function () {
@@ -234,7 +243,7 @@ var playerLose = function () {
     pass();
 };
 var disableBtn = function () {
-    btnDraw.disabled = true;
-    btnPass.disabled = true;
+    btnDraw.style.display = "none";
+    btnPass.style.display = "none";
 };
 getDeck();

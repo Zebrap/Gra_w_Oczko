@@ -36,6 +36,10 @@ tr{
     text-transform: uppercase;
 }
 
+.card {
+  transition: transform 1s;
+}
+
 .card:hover {
   transform: scale(1.05);
 }
@@ -48,11 +52,13 @@ tr{
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
+    font-size: 1.5rem;
+    font-family: "Mansalva", cursive;
     margin: 4px 2px;
     cursor: pointer;
+    border-radius: 10px;
   }
 
-  .button:disabled{
-    background-color: #1a221a;
+  .button:hover {
+    background-color: #19a01d;
   }
