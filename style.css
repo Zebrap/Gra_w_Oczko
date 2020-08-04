@@ -1,0 +1,58 @@
+@import url("https://fonts.googleapis.com/css2?family=Mansalva:wght@400;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #00822b;
+  line-height: 1.5;
+  font-family: "Mansalva", cursive;
+}
+
+main {
+  padding: 1rem;
+  max-width: 1100px;
+  margin: auto;
+}
+
+main > h1 {
+  text-align: center;
+  color: #f5ecd2;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  text-transform: uppercase;
+}
+
+tr{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+    text-align: center;
+    color: #f8d020;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    text-transform: uppercase;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+
+  .button:disabled{
+    background-color: #1a221a;
+  }

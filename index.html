@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Gra w Oczko</title>
+  </head>
+  <body>
+    <main>
+      <button class="button" onclick="startSoloGame()">Jeden Gracz</button>
+      <button class="button" onclick="startMultiplayerGame()">Rozgrywka wieloosobowa</button>
+      <button id="btnDraw" class="button" onclick="playerDraw()" disabled="true">Dobierz karte</button>
+      <button id="btnPass" class="button" onclick="pass()" disabled="true">Pass</button>
+      <h1>Oczko</h1>
+      <h1 id="summary"></h1>
+      <table style="width:100%">
+        <tr>
+          <th id="player1">Gracz 1</th>
+          <th id="player2">Gracz 2</th> 
+          <th id="player3">Gracz 3</th>
+        </tr>
+        <tr>
+          <th id="p1"></th>
+          <th id="p2"></th>
+          <th id="p3"></th>
+        </tr>
+        <tr>
+          <th id="cards1"></th>
+          <th id="cards2"></th>
+          <th id="cards3"></th>
+        </tr>
+      </table>
+      
+    </main>
+    <script src="public/js/app.js"></script>
+  </body>
+</html>
