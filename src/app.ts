@@ -8,7 +8,8 @@ let playerNumbers : number;
 let playersInGame : number;
 let deck_id : string;
 let playerTurn : number = 0;
-let playerPoints : number[] = [0,0,0];
+let playerPoints : number[];
+let botOpponent : boolean;
 
 interface ICard {
   value: string;
@@ -21,20 +22,7 @@ interface ICard {
   const getDeck = async(): Promise<void> => {
       const data: Response = await fetch(`https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1`);
       const deck: any = await data.json();
-      deck_id = deck.deck_id
-      console.log(`new deck id: ${deck_id}`);
-    /*
-    const api = 'https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1';
-    try{
-      const data: Response = await fetch(api);
-      const deck: any = await data.json();
-      deck_id = deck.deck_id
-      console.log(`new deck id: ${deck_id}`);
-    }catch (error) {
-      if (error) {
-       //  console.error(error);
-      }
-    }*/
+      deck_id = deck.deck_id;
   };
 
   // reshuffle your deck
@@ -67,6 +55,16 @@ interface ICard {
         calcValueCards(card.value);
       }
     });
+
+    if(botOpponent && playerTurn == 1){
+      if(playerPoints[playerTurn-1] < playerPoints[playerTurn] || playerPoints[playerTurn-1] >21){
+        pass();
+      }
+      else{
+        drawCard(1);
+      }
+    }
+    
   }
 
   // Show card on board
@@ -79,6 +77,20 @@ interface ICard {
     cardsContatiner[playerTurn].innerHTML+=output;
   }
 
+  const startMultiplayerGame = ():void =>{
+    playerNumbers = 3;
+    botOpponent = false;
+    playersInGame = playerNumbers;
+    startGame();
+  }
+
+  const startSoloGame = ():void =>{
+    playerNumbers = 2;
+    botOpponent = true;
+    playersInGame = playerNumbers;
+    startGame();
+  }
+
   const startGame = ():void =>{
     resetBoard();
     playersContainer[playerTurn].setAttribute("style", "color: red");
@@ -89,33 +101,33 @@ interface ICard {
     btnDraw.style.display = "inline-block";
     btnPass.style.display = "inline-block";
     reshuffleDeck();
-    playerPoints.forEach(function(element, index, array){
-      array[index] = 0;
-    })
-    cardsContatiner.forEach(element => {
+    playerPoints = new Array();
+    for(let i = 0; i<playerNumbers; i++){
+      playerPoints.push(0);
+    }
+    cardsContatiner.forEach(function(element, index) {
       element.innerHTML= ``;
+      show_hide_Player(element,index);
     });
-    pointsContainer.forEach(element => {
+    pointsContainer.forEach(function(element, index){
       element.innerHTML= `0`;
+      show_hide_Player(element,index);
     });
     playersContainer.forEach(function(element, index){
       element.innerHTML=`Gracz ${index+1}`;
       element.setAttribute("style", "color: #f8d020");
+      show_hide_Player(element,index);
     })
     summaryContainer.innerHTML = ``;
-    playerTurn =0;
+    playerTurn = 0;
   }
 
-  const startMultiplayerGame = ():void =>{
-    playerNumbers = 3;
-    playersInGame = playerNumbers;
-    startGame();
-  }
-
-  const startSoloGame = ():void =>{
-    playerNumbers = 1;
-    playersInGame = playerNumbers;
-    startGame();
+  const show_hide_Player = (element : HTMLElement, index : number):void => {
+    if(index>=playerNumbers){
+      element.style.display = "none";
+    }else{
+      element.style.display = "block";
+    }
   }
 
   const playerDraw = ():void =>{
@@ -125,25 +137,20 @@ interface ICard {
       drawCard(1);
     }
   }
+
  const pass = ():void =>{
-    if(playersInGame<=1){
-      showSummary();
-    }
     playersContainer[playerTurn].setAttribute("style", "color: #f8d020");
     playerTurn++;
-    
-   if(playerTurn==playerNumbers){
-    showSummary();
-   }
-   
-    if(playerTurn>=playerNumbers){
-      playerTurn=0;
+    if(botOpponent && playerTurn == 1){
+      disableBtn();
     }
-    playersContainer[playerTurn].setAttribute("style", "color: red");
-    if(playerPoints[playerTurn]==0){
+    
+    if(playerTurn>=playerNumbers || playersInGame <= 1){
+      showSummary();
+    }
+    else if(playerPoints[playerTurn]==0){
+      playersContainer[playerTurn].setAttribute("style", "color: red");
       playerDraw();
-    }else if(playerPoints[playerTurn]>=22){
-        pass();
     }
   }
 
@@ -171,32 +178,45 @@ interface ICard {
       } 
     }
     pointsContainer[playerTurn].innerHTML = playerPoints[playerTurn];
-    if(playerPoints[playerTurn]>=22){
+    if(playerPoints[playerTurn]==21){
+      pass();
+    }
+    else if(playerPoints[playerTurn]>=22){
       playerLose();
     }
   }
 
   const showSummary = ():void =>{
     disableBtn();
-    let maxValue = 0;
-    let indexPlayer = -1;
-    playerPoints.forEach(function(element, index){
+    let maxValue = -1;
+    let winers : number[] = new Array();
+    playerPoints.forEach(function(element){
       if(element>maxValue && element<22){
         maxValue = element;
-        indexPlayer = index;
       }
     })
-    let output: string;
-    if(indexPlayer==-1){
-      output = `
-      Przegrana
-    `;
+    playerPoints.forEach(function(element, index){
+      if(element==maxValue){
+        winers.push(index+1);
+      }
+    })
+    let output: string ;
+    // chack if many players have the same score, draw
+    if(winers.length>1){
+      output = `Remis, wygrywaja Gracze: `;
+      winers.forEach(function(element, index){
+        output += `${element} `;
+        if(winers.length > index+1){
+          output += `i `;
+        }
+      })
+      output += `uzyzkując ${maxValue} pukntów`
     }else{
-      indexPlayer++;
-      output = `
-      Wygrywa gacz ${indexPlayer} uzyskując ${maxValue} pukntów
+      output= `
+      Wygrywa gacz ${winers[0]} uzyskując ${maxValue} pukntów
     `;
     }
+    
   summaryContainer.innerHTML = output;
   }
 
@@ -206,6 +226,7 @@ interface ICard {
      Wygrywa gacz ${playerTurn+1} - Oczko 
   `;
   summaryContainer.innerHTML = output;
+  pointsContainer[playerTurn].innerHTML = `Oczko`;
   }
 
   const playerLose = ():void =>{

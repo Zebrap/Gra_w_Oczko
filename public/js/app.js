@@ -45,7 +45,8 @@ var playerNumbers;
 var playersInGame;
 var deck_id;
 var playerTurn = 0;
-var playerPoints = [0, 0, 0];
+var playerPoints;
+var botOpponent;
 // Get new deck id
 var getDeck = function () { return __awaiter(void 0, void 0, void 0, function () {
     var data, deck;
@@ -58,7 +59,6 @@ var getDeck = function () { return __awaiter(void 0, void 0, void 0, function ()
             case 2:
                 deck = _a.sent();
                 deck_id = deck.deck_id;
-                console.log("new deck id: " + deck_id);
                 return [2 /*return*/];
         }
     });
@@ -111,6 +111,14 @@ var drawCard = function (count) { return __awaiter(void 0, void 0, void 0, funct
                         calcValueCards(card.value);
                     }
                 });
+                if (botOpponent && playerTurn == 1) {
+                    if (playerPoints[playerTurn - 1] < playerPoints[playerTurn] || playerPoints[playerTurn - 1] > 21) {
+                        pass();
+                    }
+                    else {
+                        drawCard(1);
+                    }
+                }
                 return [2 /*return*/];
         }
     });
@@ -119,6 +127,18 @@ var drawCard = function (count) { return __awaiter(void 0, void 0, void 0, funct
 var addCardToContainer = function (card) {
     var output = "\n      <div class=\"card\">\n          <img src=" + card.image + " alt=" + card.code + " />\n      </div>\n    ";
     cardsContatiner[playerTurn].innerHTML += output;
+};
+var startMultiplayerGame = function () {
+    playerNumbers = 3;
+    botOpponent = false;
+    playersInGame = playerNumbers;
+    startGame();
+};
+var startSoloGame = function () {
+    playerNumbers = 2;
+    botOpponent = true;
+    playersInGame = playerNumbers;
+    startGame();
 };
 var startGame = function () {
     resetBoard();
@@ -129,31 +149,33 @@ var resetBoard = function () {
     btnDraw.style.display = "inline-block";
     btnPass.style.display = "inline-block";
     reshuffleDeck();
-    playerPoints.forEach(function (element, index, array) {
-        array[index] = 0;
-    });
-    cardsContatiner.forEach(function (element) {
+    playerPoints = new Array();
+    for (var i = 0; i < playerNumbers; i++) {
+        playerPoints.push(0);
+    }
+    cardsContatiner.forEach(function (element, index) {
         element.innerHTML = "";
+        show_hide_Player(element, index);
     });
-    pointsContainer.forEach(function (element) {
+    pointsContainer.forEach(function (element, index) {
         element.innerHTML = "0";
+        show_hide_Player(element, index);
     });
     playersContainer.forEach(function (element, index) {
         element.innerHTML = "Gracz " + (index + 1);
         element.setAttribute("style", "color: #f8d020");
+        show_hide_Player(element, index);
     });
     summaryContainer.innerHTML = "";
     playerTurn = 0;
 };
-var startMultiplayerGame = function () {
-    playerNumbers = 3;
-    playersInGame = playerNumbers;
-    startGame();
-};
-var startSoloGame = function () {
-    playerNumbers = 1;
-    playersInGame = playerNumbers;
-    startGame();
+var show_hide_Player = function (element, index) {
+    if (index >= playerNumbers) {
+        element.style.display = "none";
+    }
+    else {
+        element.style.display = "block";
+    }
 };
 var playerDraw = function () {
     if (playerPoints[playerTurn] == 0) {
@@ -164,23 +186,17 @@ var playerDraw = function () {
     }
 };
 var pass = function () {
-    if (playersInGame <= 1) {
-        showSummary();
-    }
     playersContainer[playerTurn].setAttribute("style", "color: #f8d020");
     playerTurn++;
-    if (playerTurn == playerNumbers) {
+    if (botOpponent && playerTurn == 1) {
+        disableBtn();
+    }
+    if (playerTurn >= playerNumbers || playersInGame <= 1) {
         showSummary();
     }
-    if (playerTurn >= playerNumbers) {
-        playerTurn = 0;
-    }
-    playersContainer[playerTurn].setAttribute("style", "color: red");
-    if (playerPoints[playerTurn] == 0) {
+    else if (playerPoints[playerTurn] == 0) {
+        playersContainer[playerTurn].setAttribute("style", "color: red");
         playerDraw();
-    }
-    else if (playerPoints[playerTurn] >= 22) {
-        pass();
     }
 };
 var calcValueCards = function (value) {
@@ -207,27 +223,41 @@ var calcValueCards = function (value) {
         }
     }
     pointsContainer[playerTurn].innerHTML = playerPoints[playerTurn];
-    if (playerPoints[playerTurn] >= 22) {
+    if (playerPoints[playerTurn] == 21) {
+        pass();
+    }
+    else if (playerPoints[playerTurn] >= 22) {
         playerLose();
     }
 };
 var showSummary = function () {
     disableBtn();
-    var maxValue = 0;
-    var indexPlayer = -1;
-    playerPoints.forEach(function (element, index) {
+    var maxValue = -1;
+    var winers = new Array();
+    playerPoints.forEach(function (element) {
         if (element > maxValue && element < 22) {
             maxValue = element;
-            indexPlayer = index;
+        }
+    });
+    playerPoints.forEach(function (element, index) {
+        if (element == maxValue) {
+            winers.push(index + 1);
         }
     });
     var output;
-    if (indexPlayer == -1) {
-        output = "\n      Przegrana\n    ";
+    // chack if many players have the same score, draw
+    if (winers.length > 1) {
+        output = "Remis, wygrywaja Gracze: ";
+        winers.forEach(function (element, index) {
+            output += element + " ";
+            if (winers.length > index + 1) {
+                output += "i ";
+            }
+        });
+        output += "uzyzkuj\u0105c " + maxValue + " puknt\u00F3w";
     }
     else {
-        indexPlayer++;
-        output = "\n      Wygrywa gacz " + indexPlayer + " uzyskuj\u0105c " + maxValue + " puknt\u00F3w\n    ";
+        output = "\n      Wygrywa gacz " + winers[0] + " uzyskuj\u0105c " + maxValue + " puknt\u00F3w\n    ";
     }
     summaryContainer.innerHTML = output;
 };
@@ -235,6 +265,7 @@ var playerWinOczko = function () {
     disableBtn();
     var output = "\n     Wygrywa gacz " + (playerTurn + 1) + " - Oczko \n  ";
     summaryContainer.innerHTML = output;
+    pointsContainer[playerTurn].innerHTML = "Oczko";
 };
 var playerLose = function () {
     playersInGame--;
